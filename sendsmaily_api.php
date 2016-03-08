@@ -33,10 +33,10 @@ class sendsmaily
       $this->_error('Action has not been chosen.');
     }
     if ($values['action'] === 'change_email') {
-      echo '<pre>'.print_r($values, true).'</pre>';
+      $this->_change_email($values['change_email']);
     }
     elseif ($values['action'] === 'receive_frequency') {
-      echo '<pre>'.print_r($values, true).'</pre>';
+      $this->_frequency($values['frequency']);
     }
     elseif ($values['action'] === 'unsubscribe') {
       $this->_unsubscribe(
@@ -136,6 +136,34 @@ class sendsmaily
    * CURL COMMANDS.
    */
 
+  public function _change_email($new_email) {
+    $loc = $this->domain . 'contact.php';
+
+    $contact = $this->_curl($loc, array('email' => $this->email), false);
+
+    $contact['email'] = $new_email;
+    $create = $this->_curl($loc, $contact);
+
+    $query = array(
+      'email' => $this->email,
+      'is_unsubscribed' => 1,
+    );
+    $unsubscribed = $this->_curl($loc, $query);
+
+    $this->email = $new_email;
+
+    return $contact && $unsubscribed && $create;
+  }
+
+  public function _frequency($receive_frequency) {
+    //$loc = $this->domain . 'contact.php';
+    //$query = array(
+    //  'email' => $this->email,
+    //  'receive_frequency' => $receive_frequency,
+    //);
+    //return $this->_curl($loc, $query);
+  }
+
   public function _unsubscribe($campaign_id, $reason, $reason_other) {
     $loc = $this->domain . 'contact.php';
     $query = array(
@@ -159,7 +187,7 @@ class sendsmaily
    * HELPER FUNCTIONS.
    */
 
-  private function _curl($url, $query) {
+  private function _curl($url, $query, $bool = true) {
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_HEADER, 0);
@@ -172,6 +200,10 @@ class sendsmaily
     curl_close($ch);
 
     $result = $this->_process_request($result);
+
+    if (!$bool) {
+      return $result;
+    }
 
     if (!isset($result['code'])) {
       $this->_error('Something went wrong with the request.');
