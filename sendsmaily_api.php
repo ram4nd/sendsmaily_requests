@@ -3,6 +3,7 @@
  * @file Class for Sendsmaily API requests.
  *
  * @author Ra Mänd <ram4nd@gmail.com>
+ * @link http://browse-tutorials.com/
  */
 
 class sendsmaily
