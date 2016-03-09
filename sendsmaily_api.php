@@ -4,6 +4,12 @@
  *
  * @author Ra Mänd <ram4nd@gmail.com>
  * @link http://browse-tutorials.com/
+ *
+ * Example:
+ * require_once 'sendsmaily_api.php';
+ * $user = '';
+ * $pass = '';
+ * $smly = new sendsmaily($user, $pass, 'client');
  */
 
 class sendsmaily
@@ -11,17 +17,18 @@ class sendsmaily
   private $username;
   private $password;
   private $domain;
-  private $email;
 
   private $errors = array();
 
-  public function __construct($username, $password, $domain, $email) {
+  public function __construct($username, $password, $domain) {
     $this->username = $username;
     $this->password = $password;
 
     $this->domain = 'https://' . $domain . '.sendsmaily.net/api/';
 
-    $this->email = $email;
+    if (!isset($_GET['email'])) {
+      $this->_error('Email is missing.');
+    }
 
     if (isset($_POST) && isset($_POST['smly'])) {
       $this->form_submit($_POST['smly']);
@@ -29,9 +36,10 @@ class sendsmaily
   }
 
   public function form_submit($values) {
-    if (!isset($values['action'])) {
+    if (!isset($values['action']) && !empty($values['action'])) {
       $this->_error('Action has not been chosen.');
     }
+
     if ($values['action'] === 'change_email') {
       $this->_change_email($values['change_email']);
     }
@@ -139,26 +147,27 @@ class sendsmaily
   public function _change_email($new_email) {
     $loc = $this->domain . 'contact.php';
 
-    $contact = $this->_curl($loc, array('email' => $this->email), false);
+    $contact = $this->_curl($loc, array('email' => $_GET['email']), false);
 
     $contact['email'] = $new_email;
     $create = $this->_curl($loc, $contact);
 
     $query = array(
-      'email' => $this->email,
+      'email' => $_GET['email'],
       'is_unsubscribed' => 1,
     );
     $unsubscribed = $this->_curl($loc, $query);
 
-    $this->email = $new_email;
+    $_GET['email'] = $new_email;
 
     return $contact && $unsubscribed && $create;
   }
 
   public function _frequency($receive_frequency) {
+    $this->_error('Currently not implemented.');
     //$loc = $this->domain . 'contact.php';
     //$query = array(
-    //  'email' => $this->email,
+    //  'email' => $_GET['email'],
     //  'receive_frequency' => $receive_frequency,
     //);
     //return $this->_curl($loc, $query);
@@ -167,7 +176,7 @@ class sendsmaily
   public function _unsubscribe($campaign_id, $reason, $reason_other) {
     $loc = $this->domain . 'contact.php';
     $query = array(
-      'email' => $this->email,
+      'email' => $_GET['email'],
       'unsubscribe_reason' => $reason,
       'unsubscribe_reason_other' => $reason_other,
     );
@@ -175,7 +184,7 @@ class sendsmaily
 
     $loc = $this->domain . 'unsubscribe.php';
     $query = array(
-      'email' => $this->email,
+      'email' => $_GET['email'],
       'campaign_id' => $campaign_id,
     );
     $unsubscribe = $this->_curl($loc, $query);
@@ -244,6 +253,6 @@ class sendsmaily
   }
 
   private function _error($msg) {
-    $errors[] = $msg;
+    $this->errors[] = $msg;
   }
 }
