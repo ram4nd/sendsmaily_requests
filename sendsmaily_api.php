@@ -45,8 +45,8 @@ class sendsmaily
     if (!empty($this->errors)) {
       $this->html .= implode('<br />', $this->errors);
     }
-    else {
-      $this->html .=
+    elseif (empty($this->html)) {
+      $this->html =
         $this->form_prefix .
         '<form action="' . $this->_request_uri() . '" method="post" style="height:100%;" id="smly-form">' .
           $this->_edit_form() .
@@ -76,9 +76,9 @@ class sendsmaily
       if (isset($_GET['campaign_id']) && !empty($_GET['campaign_id'])) {
 
         if ($this->_unsubscribe(
-            $values['campaign_id'],
-            $values['unsubscribe'],
-            $values['unsubscribe_comment'][ $values['unsubscribe'] ]
+          $values['campaign_id'],
+          $values['unsubscribe'],
+          ((int)$values['unsubscribe'] === 1 ? $values['unsubscribe_comment'] : '')
         )) {
           $this->html .= $this->_success_html('Loobumine uudiskirjast õnnestus');
         }
@@ -100,7 +100,7 @@ class sendsmaily
     return '<ul class="smly_actions">' .
       '<li>' .
         '<input type="radio" name="smly[action]" value="change_email" id="smly_change_email">&nbsp;' .
-        '<label for="smly_change_email">Soovin muuta oma emaili aadressit. ('.$_GET['email'].')</label>' .
+        '<label for="smly_change_email">Soovin muuta oma emaili aadressi. ('.$_GET['email'].')</label>' .
         $this->_change_email_form() .
       '</li><li>' .
         '<input type="radio" name="smly[action]" value="receive_frequency" id="smly_receive_frequency">&nbsp;' .
@@ -127,21 +127,18 @@ class sendsmaily
     return '<input type="hidden" name="smly[campaign_id]" value="' . $_GET['campaign_id'] . '" />' .
       '<ul class="smly_action_unsubscribe">' .
         '<li>' .
-          '<input type="radio" name="smly[unsubscribe]" value="4" id="unsubscribe_reason_4">&nbsp;' .
+          '<input type="radio" name="smly[unsubscribe]" value="4" id="unsubscribe_reason_4" checked="checked">&nbsp;' .
           '<label for="unsubscribe_reason_4">Liiga sage saatmistihedus</label>' .
-          '<textarea name="smly[unsubscribe_comment][4]" rows="4" placeholder="Kirjutage paari sõnaga oma otsusest"></textarea>' .
         '</li><li>' .
           '<input type="radio" name="smly[unsubscribe]" value="3" id="unsubscribe_reason_3">&nbsp;' .
           '<label for="unsubscribe_reason_3">Sisaldab ainult müügipakkumisi</label>' .
-          '<textarea name="smly[unsubscribe_comment][3]" rows="4" placeholder="Kirjutage paari sõnaga oma otsusest"></textarea>' .
         '</li><li>' .
           '<input type="radio" name="smly[unsubscribe]" value="2" id="unsubscribe_reason_2">&nbsp;' .
           '<label for="unsubscribe_reason_2">Ebahuvitav sisu</label>' .
-          '<textarea name="smly[unsubscribe_comment][2]" rows="4" placeholder="Kirjutage paari sõnaga oma otsusest"></textarea>' .
         '</li><li>' .
           '<input type="radio" name="smly[unsubscribe]" value="1" id="unsubscribe_reason_1">&nbsp;' .
           '<label for="unsubscribe_reason_1">Muu</label>' .
-          '<textarea name="smly[unsubscribe_comment][1]" rows="4" placeholder="Kirjutage paari sõnaga oma otsusest"></textarea>' .
+          '<textarea name="smly[unsubscribe_comment]" rows="4" placeholder="Kirjutage paari sõnaga oma otsusest"></textarea>' .
         '</li>' .
       '</ul>';
   }
@@ -149,7 +146,7 @@ class sendsmaily
   private function _frequency_form() {
     return '<ul class="smly_action_frequency">' .
       '<li>' .
-        '<input type="radio" name="smly[frequency]" value="3" id="smly_frequency_3">&nbsp;' .
+        '<input type="radio" name="smly[frequency]" value="3" id="smly_frequency_3" checked="checked">&nbsp;' .
         '<label for="smly_frequency_3">Ilma piiranguteta</label>' .
       '</li><li>' .
         '<input type="radio" name="smly[frequency]" value="2" id="smly_frequency_2">&nbsp;' .
@@ -202,8 +199,10 @@ class sendsmaily
     $query = array(
       'email' => $_GET['email'],
       'unsubscribe_reason' => $reason,
-      'unsubscribe_reason_other' => $reason_other,
     );
+    if (!empty($reason_other)) {
+      $query['unsubscribe_reason_other'] = $reason_other;
+    }
     $reason = $this->_curl_post($loc, $query);
     $loc = $this->domain . 'unsubscribe.php';
     $query = array(
