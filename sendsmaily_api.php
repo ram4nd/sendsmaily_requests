@@ -10,6 +10,8 @@
  * $user = '';
  * $pass = '';
  * $smly = new sendsmaily($user, $pass, 'client');
+ *
+ * echo $smly->form();
  */
 
 class sendsmaily
@@ -19,6 +21,9 @@ class sendsmaily
   private $domain;
 
   private $errors = array();
+  private $html = '';
+
+  public $form_prefix = '';
 
   public function __construct($username, $password, $domain) {
     $this->username = $username;
@@ -35,23 +40,52 @@ class sendsmaily
     }
   }
 
+  public function content() {
+
+    if (!empty($this->errors)) {
+      $this->html .= implode('<br />', $this->errors);
+    }
+    else {
+      $this->html .=
+        $this->form_prefix .
+        '<form action="' . $this->_request_uri() . '" method="post" style="height:100%;" id="smly-form">' .
+          $this->_edit_form() .
+          '<input type="submit" value="Edasta" />' .
+        '</form>';
+    }
+
+    return $this->html;
+  }
+
   public function form_submit($values) {
     if (!isset($values['action']) && !empty($values['action'])) {
       $this->_error('Action has not been chosen.');
     }
 
     if ($values['action'] === 'change_email') {
-      $this->_change_email($values['change_email']);
+      if ($this->_change_email($values['change_email'])) {
+        $this->html .= $this->_success_html('E-maili muutmine õnnestus');
+      }
     }
     elseif ($values['action'] === 'receive_frequency') {
-      $this->_frequency($values['frequency']);
+      if ($this->_frequency($values['frequency'])) {
+        $this->html .= $this->_success_html('Saatmise sageduse muutmine õnnestus');
+      }
     }
     elseif ($values['action'] === 'unsubscribe') {
-      $this->_unsubscribe(
-        $values['campaign_id'],
-        $values['unsubscribe'],
-        $values['unsubscribe_comment'][$values['unsubscribe']]
-      );
+      if (isset($_GET['campaign_id']) && !empty($_GET['campaign_id'])) {
+
+        if ($this->_unsubscribe(
+            $values['campaign_id'],
+            $values['unsubscribe'],
+            $values['unsubscribe_comment'][ $values['unsubscribe'] ]
+        )) {
+          $this->html .= $this->_success_html('Loobumine uudiskirjast õnnestus');
+        }
+      }
+      else {
+        $this->_error('Campaign id is missing.');
+      }
     }
     else {
       $this->_error('Form elements does not exist.');
@@ -61,20 +95,6 @@ class sendsmaily
   /**
    * FORM HTML.
    */
-
-  public function form() {
-    if (!empty($this->errors)) {
-      return implode('<br />', $this->errors);
-    }
-    else {
-      return
-        '<form action="' . $this->_request_uri() . '" method="post" style="height:100%;" id="smly-form">' .
-          '<input type="hidden" name="smly[campaign_id]" value="' . $_GET['campaign_id'] . '" />' .
-          $this->_edit_form() .
-          '<input type="submit" value="Edasta" />' .
-        '</form>';
-    }
-  }
 
   private function _edit_form() {
     return '<ul class="smly_actions">' .
@@ -97,32 +117,33 @@ class sendsmaily
   private function _change_email_form() {
     return '<ul class="smly_change_email">' .
       '<li>' .
-        '<label for="smly_change_email">Sisestage uus emaili aadress</label>' .
+        '<label for="smly_change_email">Sisestage uus emaili aadress</label>&nbsp;' .
         '<input name="smly[change_email]" type="text" value="" />' .
       '</li>' .
     '</ul>';
   }
 
   private function _unsubscribe_form() {
-    return '<ul class="smly_action_unsubscribe">' .
-      '<li>' .
-        '<input type="radio" name="smly[unsubscribe]" value="4" id="unsubscribe_reason_4">&nbsp;' .
-        '<label for="unsubscribe_reason_4">Liiga sage saatmistihedus</label>' .
-        '<textarea name="smly[unsubscribe_comment][4]" rows="4" style="width:100%" placeholder="Kirjutage paari sõnaga oma otsusest"></textarea>' .
-      '</li><li>' .
-        '<input type="radio" name="smly[unsubscribe]" value="3" id="unsubscribe_reason_3">&nbsp;' .
-        '<label for="unsubscribe_reason_3">Sisaldab ainult müügipakkumisi</label>' .
-        '<textarea name="smly[unsubscribe_comment][3]" rows="4" style="width:100%" placeholder="Kirjutage paari sõnaga oma otsusest"></textarea>' .
-      '</li><li>' .
-        '<input type="radio" name="smly[unsubscribe]" value="2" id="unsubscribe_reason_2">&nbsp;' .
-        '<label for="unsubscribe_reason_2">Ebahuvitav sisu</label>' .
-        '<textarea name="smly[unsubscribe_comment][2]" rows="4" style="width:100%" placeholder="Kirjutage paari sõnaga oma otsusest"></textarea>' .
-      '</li><li>' .
-        '<input type="radio" name="smly[unsubscribe]" value="1" id="unsubscribe_reason_1">&nbsp;' .
-        '<label for="unsubscribe_reason_1">Muu</label>' .
-        '<textarea name="smly[unsubscribe_comment][1]" rows="4" style="width:100%" placeholder="Kirjutage paari sõnaga oma otsusest"></textarea>' .
-      '</li>' .
-    '</ul>';
+    return '<input type="hidden" name="smly[campaign_id]" value="' . $_GET['campaign_id'] . '" />' .
+      '<ul class="smly_action_unsubscribe">' .
+        '<li>' .
+          '<input type="radio" name="smly[unsubscribe]" value="4" id="unsubscribe_reason_4">&nbsp;' .
+          '<label for="unsubscribe_reason_4">Liiga sage saatmistihedus</label>' .
+          '<textarea name="smly[unsubscribe_comment][4]" rows="4" placeholder="Kirjutage paari sõnaga oma otsusest"></textarea>' .
+        '</li><li>' .
+          '<input type="radio" name="smly[unsubscribe]" value="3" id="unsubscribe_reason_3">&nbsp;' .
+          '<label for="unsubscribe_reason_3">Sisaldab ainult müügipakkumisi</label>' .
+          '<textarea name="smly[unsubscribe_comment][3]" rows="4" placeholder="Kirjutage paari sõnaga oma otsusest"></textarea>' .
+        '</li><li>' .
+          '<input type="radio" name="smly[unsubscribe]" value="2" id="unsubscribe_reason_2">&nbsp;' .
+          '<label for="unsubscribe_reason_2">Ebahuvitav sisu</label>' .
+          '<textarea name="smly[unsubscribe_comment][2]" rows="4" placeholder="Kirjutage paari sõnaga oma otsusest"></textarea>' .
+        '</li><li>' .
+          '<input type="radio" name="smly[unsubscribe]" value="1" id="unsubscribe_reason_1">&nbsp;' .
+          '<label for="unsubscribe_reason_1">Muu</label>' .
+          '<textarea name="smly[unsubscribe_comment][1]" rows="4" placeholder="Kirjutage paari sõnaga oma otsusest"></textarea>' .
+        '</li>' .
+      '</ul>';
   }
 
   private function _frequency_form() {
@@ -147,16 +168,16 @@ class sendsmaily
   public function _change_email($new_email) {
     $loc = $this->domain . 'contact.php';
 
-    $contact = $this->_curl($loc, array('email' => $_GET['email']), false);
-
+    $contact = $this->_curl_get($loc, array('email' => $_GET['email']));
     $contact['email'] = $new_email;
-    $create = $this->_curl($loc, $contact);
+    $contact['is_unsubscribed'] = 0;
+    $create = $this->_curl_post($loc, $contact);
 
     $query = array(
       'email' => $_GET['email'],
       'is_unsubscribed' => 1,
     );
-    $unsubscribed = $this->_curl($loc, $query);
+    $unsubscribed = $this->_curl_post($loc, $query);
 
     $_GET['email'] = $new_email;
 
@@ -164,30 +185,32 @@ class sendsmaily
   }
 
   public function _frequency($receive_frequency) {
-    $this->_error('Currently not implemented.');
-    //$loc = $this->domain . 'contact.php';
-    //$query = array(
-    //  'email' => $_GET['email'],
-    //  'receive_frequency' => $receive_frequency,
-    //);
-    //return $this->_curl($loc, $query);
+    $loc = $this->domain . 'contact.php';
+    $query = array(
+      'email' => $_GET['email'],
+      'receive_frequency' => $receive_frequency,
+    );
+    return $this->_curl_post($loc, $query);
   }
 
   public function _unsubscribe($campaign_id, $reason, $reason_other) {
+    if (!isset($_GET['campaign_id'])) {
+      $this->_error('Campaign id is missing.');
+    }
+
     $loc = $this->domain . 'contact.php';
     $query = array(
       'email' => $_GET['email'],
       'unsubscribe_reason' => $reason,
       'unsubscribe_reason_other' => $reason_other,
     );
-    $reason = $this->_curl($loc, $query);
-
+    $reason = $this->_curl_post($loc, $query);
     $loc = $this->domain . 'unsubscribe.php';
     $query = array(
       'email' => $_GET['email'],
       'campaign_id' => $campaign_id,
     );
-    $unsubscribe = $this->_curl($loc, $query);
+    $unsubscribe = $this->_curl_post($loc, $query);
 
     return $reason && $unsubscribe;
   }
@@ -196,7 +219,22 @@ class sendsmaily
    * HELPER FUNCTIONS.
    */
 
-  private function _curl($url, $query, $bool = true) {
+  private function _curl_get($url, $query) {
+    $query = urldecode(http_build_query($query));
+
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url . '?' . $query);
+    curl_setopt($ch, CURLOPT_HEADER, 0);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_USERPWD, $this->username . ':' . $this->password);
+
+    $result = curl_exec($ch);
+    curl_close($ch);
+
+    return $this->_process_request($result);
+  }
+
+  private function _curl_post($url, $query) {
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_HEADER, 0);
@@ -209,10 +247,6 @@ class sendsmaily
     curl_close($ch);
 
     $result = $this->_process_request($result);
-
-    if (!$bool) {
-      return $result;
-    }
 
     if (!isset($result['code'])) {
       $this->_error('Something went wrong with the request.');
@@ -253,6 +287,13 @@ class sendsmaily
   }
 
   private function _error($msg) {
-    $this->errors[] = $msg;
+    $this->errors[] = $this->_error_html($msg);
+  }
+
+  private function _success_html($msg) {
+    return '<p style="padding:15px;background:#dff0d8;margin:0 0 10px;">' . $msg . '</p>';
+  }
+  private function _error_html($msg) {
+    return '<p style="padding:15px;background:#f2dede;margin:0 0 10px;">' . $msg . '</p>';
   }
 }
