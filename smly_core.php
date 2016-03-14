@@ -29,7 +29,7 @@ class smly
     $this->domain = 'https://' . $domain . '.sendsmaily.net/api/';
   }
 
-  public function curl_get($url, $query) {
+  public function curl_get($url, $query = array()) {
     $query = urldecode(http_build_query($query));
 
     $ch = curl_init();
