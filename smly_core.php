@@ -7,7 +7,11 @@
  *
  * Example:
  * require_once 'sendsmaily_api.php'
- * $smly = new smly('username', 'password', 'client');
+ * $smly = new sendsmaily('username', 'password', 'client');
+ * 
+ * $list = $smly->curl_get('contact.php', array(
+ *   'list' => 1,
+ * ));
  */
 
 class smly
@@ -17,7 +21,6 @@ class smly
   private $domain;
 
   public $errors = array();
-  private $html = '';
 
   public function __construct($username, $password, $domain) {
     $this->username = $username;
@@ -30,7 +33,7 @@ class smly
     $query = urldecode(http_build_query($query));
 
     $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $url . '?' . $query);
+    curl_setopt($ch, CURLOPT_URL, $this->domain . $url . '?' . $query);
     curl_setopt($ch, CURLOPT_HEADER, 0);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($ch, CURLOPT_USERPWD, $this->username . ':' . $this->password);
@@ -43,7 +46,7 @@ class smly
 
   public function curl_post($url, $query) {
     $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_URL, $this->domain . $url);
     curl_setopt($ch, CURLOPT_HEADER, 0);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($ch, CURLOPT_POST, 1);
