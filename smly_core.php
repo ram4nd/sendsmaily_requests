@@ -8,7 +8,7 @@
  * Example:
  * require_once 'sendsmaily_api.php'
  * $smly = new sendsmaily('username', 'password', 'client');
- * 
+ *
  * $list = $smly->curl_get('contact.php', array(
  *   'list' => 1,
  * ));
@@ -26,7 +26,7 @@ class smly
     $this->username = $username;
     $this->password = $password;
 
-    $this->domain = 'https://' . $domain . '.sendsmaily.net/api/';
+    $this->domain = $this->set_domain($domain);
   }
 
   public function curl_get($url, $query = array()) {
@@ -77,5 +77,9 @@ class smly
 
   private function _error($msg) {
     $this->errors[] = $msg;
+  }
+
+  public function set_domain($domain) {
+    $this->domain = 'https://' . $domain . '.sendsmaily.net/api/';
   }
 }
