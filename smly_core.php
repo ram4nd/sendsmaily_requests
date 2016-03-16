@@ -26,7 +26,7 @@ class smly
     $this->username = $username;
     $this->password = $password;
 
-    $this->domain = $this->set_domain($domain);
+    $this->domain = 'https://' . $domain . '.sendsmaily.net/api/';
   }
 
   public function curl_get($url, $query = array()) {
@@ -76,7 +76,7 @@ class smly
   }
 
   private function _error($msg) {
-    $this->errors[] = $msg;
+    $this->errors[] = $this->domain . ' - ' . date('d.m.Y H:i:s') . ': ' . $msg;
   }
 
   public function set_domain($domain) {
