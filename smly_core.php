@@ -6,7 +6,7 @@
  * @link http://browse-tutorials.com/
  *
  * Example:
- * require_once 'sendsmaily_api.php'
+ * require_once 'smly_core.php'
  * $smly = new smly('username', 'password', 'client');
  *
  * $list = $smly->curl_get('contact.php', array(
@@ -42,6 +42,9 @@ class smly
     curl_setopt($ch, CURLOPT_USERPWD, $this->username . ':' . $this->password);
 
     $result = curl_exec($ch);
+    if ($result === false) {
+      $this->_error(curl_error($ch));
+    }
     curl_close($ch);
 
     return $this->_process_request($result);
@@ -57,6 +60,9 @@ class smly
     curl_setopt($ch, CURLOPT_USERPWD, $this->username . ':' . $this->password);
 
     $result = curl_exec($ch);
+    if ($result === false) {
+      $this->_error(curl_error($ch));
+    }
     curl_close($ch);
 
     $result = $this->_process_request($result);
