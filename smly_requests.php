@@ -6,7 +6,7 @@
  * @link http://browse-tutorials.com/
  *
  * Example:
- * require_once 'smly_core.php'
+ * require_once 'smly_requests.php'
  * $smly = new smly('username', 'password', 'client');
  *
  * $list = $smly->curl_get('contact.php', array(
