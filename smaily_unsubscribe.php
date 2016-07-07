@@ -7,15 +7,20 @@
  *
  * Example:
  * require_once 'smaily_unsubscribe.php';
- * $user = '';
- * $pass = '';
- * $smly = new smaily($user, $pass, 'client');
+ * $smly = new smaily('USERNAME', 'PASSWORD', 'CLIENT');
  *
  * echo $smly->content();
  */
 
 class smaily_unsubscribe
 {
+  public $frequency_form = '';
+  public $unsubscribe_form = '';
+  public $change_email_form = '';
+
+  public $form_prefix = '';
+  public $form_submit_button = '<input type="submit" value="Submit" />';
+
   private $username;
   private $password;
   private $domain;
@@ -23,11 +28,13 @@ class smaily_unsubscribe
   private $errors = array();
   private $html = '';
 
-  public $form_prefix = '';
-
   public function __construct($username, $password, $domain) {
     $this->username = $username;
     $this->password = $password;
+
+    $this->frequency_form = $this->_frequency_form();
+    $this->unsubscribe_form = $this->_unsubscribe_form();
+    $this->change_email_form = $this->_change_email_form();
 
     $this->domain = 'https://' . $domain . '.sendsmaily.net/api/';
 
@@ -50,7 +57,7 @@ class smaily_unsubscribe
         $this->form_prefix .
         '<form action="' . $this->_request_uri() . '" method="post" style="height:100%;" id="smly-form">' .
           $this->_edit_form() .
-          '<input type="submit" value="Edasta" />' .
+          $this->form_submit_button .
         '</form>';
     }
 
@@ -97,20 +104,28 @@ class smaily_unsubscribe
    */
 
   private function _edit_form() {
-    return '<ul class="smly_actions">' .
-      '<li>' .
-        '<input type="radio" name="smly[action]" value="change_email" id="smly_change_email">&nbsp;' .
-        '<label for="smly_change_email">Soovin muuta oma emaili aadressi. ('.$_GET['email'].')</label>' .
-        $this->_change_email_form() .
-      '</li><li>' .
-        '<input type="radio" name="smly[action]" value="receive_frequency" id="smly_receive_frequency">&nbsp;' .
-        '<label for="smly_receive_frequency">Muuda uudiskirja saamise sagedust</label>' .
-        $this->_frequency_form() .
-      '</li><li>' .
-        '<input type="radio" name="smly[action]" value="unsubscribe" id="smly_unsubscribe">&nbsp;' .
-        '<label for="smly_unsubscribe">Loobu uudiskirjast</label>' .
-        $this->_unsubscribe_form() .
-      '</li>' .
+    return '<ul class="smly_actions" style="padding-left:0">' .
+      (!empty($this->change_email_form) ?
+        '<li>' .
+          '<input type="radio" name="smly[action]" value="change_email" id="smly_change_email">&nbsp;' .
+          '<label for="smly_change_email">Soovin muuta oma emaili aadressi. ('.$_GET['email'].')</label>' .
+          $this->change_email_form .
+        '</li>'
+      :'').
+      (!empty($this->frequency_form) ?
+        '<li>'.
+          '<input type="radio" name="smly[action]" value="receive_frequency" id="smly_receive_frequency">&nbsp;' .
+          '<label for="smly_receive_frequency">Muuda uudiskirja saamise sagedust</label>' .
+          $this->frequency_form .
+        '</li>'
+      :'').
+      (!empty($this->unsubscribe_form) ?
+        '<li>' .
+          '<input type="radio" name="smly[action]" value="unsubscribe" id="smly_unsubscribe">&nbsp;' .
+          '<label for="smly_unsubscribe">Loobu uudiskirjast</label>' .
+          $this->unsubscribe_form .
+        '</li>'
+      :'').
     '</ul>';
   }
 
