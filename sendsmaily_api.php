@@ -9,12 +9,12 @@
  * require_once 'sendsmaily_api.php';
  * $user = '';
  * $pass = '';
- * $smly = new sendsmaily($user, $pass, 'client');
+ * $smly = new smaily($user, $pass, 'client');
  *
  * echo $smly->form();
  */
 
-class sendsmaily
+class smaily
 {
   private $username;
   private $password;
