@@ -1,20 +1,20 @@
 <?php
 /**
- * @file Class for Sendsmaily API requests.
+ * @file Class for Smaily unsubscription.
  *
  * @author Ra Mänd <ram4nd@gmail.com>
  * @link http://browse-tutorials.com/
  *
  * Example:
- * require_once 'sendsmaily_api.php';
+ * require_once 'smaily_unsubscribe.php';
  * $user = '';
  * $pass = '';
  * $smly = new smaily($user, $pass, 'client');
  *
- * echo $smly->form();
+ * echo $smly->content();
  */
 
-class smaily
+class smaily_unsubscribe
 {
   private $username;
   private $password;
