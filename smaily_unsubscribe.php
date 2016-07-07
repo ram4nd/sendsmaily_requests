@@ -105,6 +105,68 @@ class smaily_unsubscribe
     }
   }
 
+  public function head() {
+    return '
+      <style type="text/css">
+        ol,ul{list-style:none;margin:0}
+        li{margin:2px 0 5px 3px;}
+        #smly-form textarea{
+          width: 450px;
+          padding: 5px;
+          margin: 10px 0 0 25px;
+        }
+      </style>
+
+      <script src="//cdn.jsdelivr.net/jquery/2.2.1/jquery.min.js"></script>
+      <script type="text/javascript">(function($){$().ready(function(){
+        var $smly_form = $("#smly-form");
+
+        // Actions.
+        var $smly_unsubscribe_options = $("ul.smly_action_unsubscribe", $smly_form);
+        var $smly_action_frequency = $("ul.smly_action_frequency", $smly_form);
+        var $smly_change_email = $("ul.smly_change_email", $smly_form);
+        $smly_unsubscribe_options.hide();
+        $smly_action_frequency.hide();
+        $smly_change_email.hide();
+        $("input[name=\'smly[action]\']", $smly_form).change(function(){
+          // Unsubscribe.
+          if ($(this).val() == "unsubscribe"){
+            $smly_unsubscribe_options.show();
+          }
+          else {
+            $smly_unsubscribe_options.hide();
+          }
+          // Frequency.
+          if ($(this).val() == "receive_frequency") {
+            $smly_action_frequency.show();
+          }
+          else {
+            $smly_action_frequency.hide();
+          }
+          // Change email.
+          if ($(this).val() == "change_email") {
+            $smly_change_email.show();
+          }
+          else {
+            $smly_change_email.hide();
+          }
+        });
+
+        // Unsubscribe.
+        $smly_unsubscribe_options.find("textarea").hide();
+        $(\'input[name="smly[unsubscribe]"]\', $smly_form).change(function(){
+          if (this.id == "unsubscribe_reason_1") {
+            $smly_unsubscribe_options.find("textarea").show();
+          }
+          else {
+            $smly_unsubscribe_options.find("textarea").hide();
+          }
+        });
+
+      });})(jQuery);</script>
+    ';
+  }
+
   /**
    * FORM HTML.
    */
