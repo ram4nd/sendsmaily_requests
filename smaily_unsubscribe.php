@@ -25,6 +25,12 @@ class smaily_unsubscribe
   private $password;
   private $domain;
 
+  public $form_strings = array(
+    'unsubscribe_reason_1' => 'I am not interested in your newsletters',
+    'unsubscribe_reason_2' => 'I am getting your newsletters too often',
+    'unsubscribe_comment' => 'Write about you decision',
+  );
+
   private $errors = array();
   private $html = '';
 
@@ -32,11 +38,11 @@ class smaily_unsubscribe
     $this->username = $username;
     $this->password = $password;
 
+    $this->domain = 'https://' . $domain . '.sendsmaily.net/api/';
+
     $this->frequency_form = $this->_frequency_form();
     $this->unsubscribe_form = $this->_unsubscribe_form();
     $this->change_email_form = $this->_change_email_form();
-
-    $this->domain = 'https://' . $domain . '.sendsmaily.net/api/';
 
     if (!isset($_GET['email'])) {
       $this->_error('Email is missing.');
@@ -109,21 +115,21 @@ class smaily_unsubscribe
         '<li>' .
           '<input type="radio" name="smly[action]" value="change_email" id="smly_change_email">&nbsp;' .
           '<label for="smly_change_email">Soovin muuta oma emaili aadressi. ('.$_GET['email'].')</label>' .
-          $this->change_email_form .
+          $this->_change_email_form() .
         '</li>'
       :'').
       (!empty($this->frequency_form) ?
         '<li>'.
           '<input type="radio" name="smly[action]" value="receive_frequency" id="smly_receive_frequency">&nbsp;' .
           '<label for="smly_receive_frequency">Muuda uudiskirja saamise sagedust</label>' .
-          $this->frequency_form .
+          $this->_frequency_form() .
         '</li>'
       :'').
       (!empty($this->unsubscribe_form) ?
         '<li>' .
           '<input type="radio" name="smly[action]" value="unsubscribe" id="smly_unsubscribe">&nbsp;' .
           '<label for="smly_unsubscribe">Loobu uudiskirjast</label>' .
-          $this->unsubscribe_form .
+          $this->_unsubscribe_form() .
         '</li>'
       :'').
     '</ul>';
@@ -142,18 +148,12 @@ class smaily_unsubscribe
     return '<input type="hidden" name="smly[campaign_id]" value="' . $_GET['campaign_id'] . '" />' .
       '<ul class="smly_action_unsubscribe">' .
         '<li>' .
-          '<input type="radio" name="smly[unsubscribe]" value="4" id="unsubscribe_reason_4" checked="checked">&nbsp;' .
-          '<label for="unsubscribe_reason_4">Liiga sage saatmistihedus</label>' .
-        '</li><li>' .
-          '<input type="radio" name="smly[unsubscribe]" value="3" id="unsubscribe_reason_3">&nbsp;' .
-          '<label for="unsubscribe_reason_3">Sisaldab ainult müügipakkumisi</label>' .
+          '<input type="radio" name="smly[unsubscribe]" value="1" id="unsubscribe_reason_1">&nbsp;' .
+          '<label for="unsubscribe_reason_1">'.$this->form_strings['unsubscribe_reason_1'].'</label>' .
+          '<textarea name="smly[unsubscribe_comment]" rows="4" placeholder="'.$this->form_strings['unsubscribe_comment'].'"></textarea>' .
         '</li><li>' .
           '<input type="radio" name="smly[unsubscribe]" value="2" id="unsubscribe_reason_2">&nbsp;' .
-          '<label for="unsubscribe_reason_2">Ebahuvitav sisu</label>' .
-        '</li><li>' .
-          '<input type="radio" name="smly[unsubscribe]" value="1" id="unsubscribe_reason_1">&nbsp;' .
-          '<label for="unsubscribe_reason_1">Muu</label>' .
-          '<textarea name="smly[unsubscribe_comment]" rows="4" placeholder="Kirjutage paari sõnaga oma otsusest"></textarea>' .
+          '<label for="unsubscribe_reason_2">'.$this->form_strings['unsubscribe_reason_2'].'</label>' .
         '</li>' .
       '</ul>';
   }
