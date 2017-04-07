@@ -16,14 +16,14 @@
 
 class smly
 {
-  private $username;
-  private $password;
-  private $domain;
+  protected $username;
+  protected $password;
+  protected $domain;
 
   public $errors = array();
 
-  private $protocol = 'https';
-  private $tld = 'net';
+  protected $protocol = 'https';
+  protected $tld = 'net';
 
   public function __construct($username, $password, $domain) {
     $this->username = $username;
@@ -80,11 +80,11 @@ class smly
     }
   }
 
-  private function _process_request($curl_result) {
+  protected function _process_request($curl_result) {
     return json_decode($curl_result, true);
   }
 
-  private function _error($msg) {
+  protected function _error($msg) {
     $this->errors[] = $this->domain . ' - ' . date('d.m.Y H:i:s') . ': ' . $msg;
   }
 
@@ -92,3 +92,4 @@ class smly
     $this->domain = $this->protocol . '://' . $domain . '.sendsmaily.' . $this->tld . '/api/';
   }
 }
+
