@@ -243,7 +243,7 @@ class smaily_unsubscribe extends smly
    */
 
   public function _change_email($new_email) {
-    $loc = $this->domain . 'contact.php';
+    $loc = 'contact.php';
 
     $contact = $this->curl_get($loc, array('email' => $_GET['email']));
     $contact['email'] = $new_email;
@@ -262,7 +262,7 @@ class smaily_unsubscribe extends smly
   }
 
   public function _frequency() {
-    $loc = $this->domain . 'contact.php';
+    $loc = 'contact.php';
     $query = array(
       'email' => $_GET['email'],
       'weekly' => 1,
@@ -275,7 +275,7 @@ class smaily_unsubscribe extends smly
       $this->_error('Campaign id is missing.');
     }
 
-    $loc = $this->domain . 'contact.php';
+    $loc = 'contact.php';
     $query = array(
       'email' => $_GET['email'],
       'unsubscribe_reason' => $reason,
@@ -284,7 +284,7 @@ class smaily_unsubscribe extends smly
       $query['unsubscribe_reason_other'] = $reason_other;
     }
     $reason = $this->curl_post($loc, $query);
-    $loc = $this->domain . 'unsubscribe.php';
+    $loc = 'unsubscribe.php';
     $query = array(
       'email' => $_GET['email'],
       'campaign_id' => $campaign_id,
@@ -320,7 +320,7 @@ class smaily_unsubscribe extends smly
   }
 
   protected function _error($msg) {
-    $this->errors[] = $this->_error_html($this->domain . ' - ' . date('d.m.Y H:i:s') . ': ' . $msg);
+    $this->errors[] = $this->_error_html(date('d.m.Y H:i:s') . ': ' . $msg);
   }
 
   private function _success_html($msg) {
