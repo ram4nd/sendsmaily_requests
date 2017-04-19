@@ -37,13 +37,20 @@ $successUrl = $_POST['success_url'];
 $failureUrl = $_POST['failure_url'];
 
 // Validate captcha.
-if(!isset($_POST['g-recaptcha-response']) or empty($_POST['g-recaptcha-response'])) {
+if (!isset($_POST['g-recaptcha-response']) or empty($_POST['g-recaptcha-response'])) {
   header('Location: ' . $failureUrl);
   exit;
 }
-$response = file_get_contents(
-  'https://www.google.com/recaptcha/api/siteverify?secret=' . $secretKey . '&response=' . $_POST['g-recaptcha-response'] . '&remoteip=' . $_SERVER['REMOTE_ADDR']
-);
+
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_AUTOREFERER, TRUE);
+curl_setopt($ch, CURLOPT_HEADER, 0);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+curl_setopt($ch, CURLOPT_URL, 'https://www.google.com/recaptcha/api/siteverify?secret=' . $secretKey . '&response=' . $_POST['g-recaptcha-response'] . '&remoteip=' . $_SERVER['REMOTE_ADDR']);
+curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);       
+
+$response = curl_exec($ch);
+curl_close($ch);
 $responseObj = json_decode($response);
 if ($responseObj->success != true) {
   header('Location: ' . $failureUrl);
