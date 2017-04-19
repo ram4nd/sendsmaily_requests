@@ -3,7 +3,6 @@
  * @file Core class for Sendsmaily API requests.
  *
  * @author Ra Mänd <ram4nd@gmail.com>
- * @link http://browse-tutorials.com/
  *
  * Example:
  * require_once 'smly_requests.php'
