@@ -19,7 +19,9 @@
  *
  * 4. Use this file instead of opt-in for post to create the check.
  *      <form action="http://example.com/my_dir/captcha_subscribe.php" method="post">
- *    @see http://help.smaily.com/en/support/solutions/articles/16000008835-an-example-of-a-signup-form
+ *
+ *
+ * @see http://help.smaily.com/en/support/solutions/articles/16000008835-an-example-of-a-signup-form
  */
 
 // Secret key.
