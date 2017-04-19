@@ -3,7 +3,6 @@
  * @file Class for Smaily unsubscription.
  *
  * @author Ra Mänd <ram4nd@gmail.com>
- * @link http://browse-tutorials.com/
  *
  * Example:
  * require_once 'smaily_unsubscribe.php';
