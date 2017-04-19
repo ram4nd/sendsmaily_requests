@@ -14,6 +14,8 @@
  *      <script src="https://www.google.com/recaptcha/api.js" async defer></script>
  *      <div class="g-recaptcha" data-sitekey="SITE_KEY"></div>
  *
+ *      If you don't have wide enough signup form (in the menu for an example), then you need to add this snippet to ".g-recatptcha".
+ *      style="transform:scale(0.77);-webkit-transform:scale(0.77);transform-origin:0 0;-webkit-transform-origin:0 0;"
  * 3. Put your domain(DOMAIN.sendsmaily.net) to hidden input called domain.
  *      <input type="hidden" name="domain" value="DOMAIN">
  *
