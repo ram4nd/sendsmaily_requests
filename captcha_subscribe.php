@@ -7,8 +7,6 @@
  * How to use:
  *
  * 1. Get your captcha site and secret keys and write them to this file.
- *   // Site key
- *   $siteKey = 'SITE_KEY';
  *   // Secret key
  *   $secretKey = 'SECRET_KEY';
  *
@@ -24,8 +22,6 @@
  *    @see http://help.smaily.com/en/support/solutions/articles/16000008835-an-example-of-a-signup-form
  */
 
-// Site key.
-$siteKey = 'SITE_KEY';
 // Secret key.
 $secretKey = 'SECRET_KEY';
 
