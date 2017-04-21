@@ -4,28 +4,25 @@
  *
  * @author Ra Mänd <ram4nd@gmail.com>
  *
- * How to use:
- *
  * 1. Get your captcha site and secret keys and write them to this file.
  *   // Secret key
  *   $secretKey = 'SECRET_KEY';
  *
- * 2. Put recaptcha snippet to your form tag.
+ * 2. Put Recaptcha snippet right before four submit button.
  *      <script src="https://www.google.com/recaptcha/api.js" async defer></script>
  *      <div class="g-recaptcha" data-sitekey="SITE_KEY"></div>
  *
  *      NB: If you don't have wide enough signup form (in the menu for an example),
  *          then you need to add this snippet to ".g-recatptcha". Adjust the scale accordingly.
- *      style="transform:scale(0.77);-webkit-transform:scale(0.77);transform-origin:0 0;-webkit-transform-origin:0 0;"
+ *          style="transform:scale(0.77);-webkit-transform:scale(0.77);transform-origin:0 0;-webkit-transform-origin:0 0;"
  *
  *      NB: To use other language than English, append js url with hl attribute (et, ru).
- *      <script src="https://www.google.com/recaptcha/api.js?hl=et" async defer></script>
+ *          <script src="https://www.google.com/recaptcha/api.js?hl=et" async defer></script>
  *
- * 3. Put your domain(DOMAIN.sendsmaily.net) to hidden input called domain.
+ * 3. Replace your opt-in form tag to post to this script. Add hidden input with
+ *    your domain (DOMAIN.sendsmaily.net).
+ *      <form action="http://EXAMPLE.COM/MY_DIR/captcha_subscribe.php" method="post">
  *      <input type="hidden" name="domain" value="DOMAIN">
- *
- * 4. Use this file instead of opt-in for post to create the check.
- *      <form action="http://example.com/my_dir/captcha_subscribe.php" method="post">
  *
  * @see http://help.smaily.com/en/support/solutions/articles/16000008835-an-example-of-a-signup-form
  */
