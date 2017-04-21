@@ -17,6 +17,10 @@
  *      NB: If you don't have wide enough signup form (in the menu for an example),
  *          then you need to add this snippet to ".g-recatptcha". Adjust the scale accordingly.
  *      style="transform:scale(0.77);-webkit-transform:scale(0.77);transform-origin:0 0;-webkit-transform-origin:0 0;"
+ *
+ *      NB: To use other language than English, append js url with hl attribute (et, ru).
+ *      <script src="https://www.google.com/recaptcha/api.js?hl=et" async defer></script>
+ *
  * 3. Put your domain(DOMAIN.sendsmaily.net) to hidden input called domain.
  *      <input type="hidden" name="domain" value="DOMAIN">
  *
@@ -47,7 +51,7 @@ curl_setopt($ch, CURLOPT_AUTOREFERER, TRUE);
 curl_setopt($ch, CURLOPT_HEADER, 0);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 curl_setopt($ch, CURLOPT_URL, 'https://www.google.com/recaptcha/api/siteverify?secret=' . $secretKey . '&response=' . $_POST['g-recaptcha-response'] . '&remoteip=' . $_SERVER['REMOTE_ADDR']);
-curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);       
+curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
 
 $response = curl_exec($ch);
 curl_close($ch);
@@ -72,8 +76,8 @@ curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query(
     $_POST,
     array(
       'remote' => 1,
-	  'success_url' => $successUrl,
-	  'failure_url' => $failureUrl,
+      'success_url' => $successUrl,
+      'failure_url' => $failureUrl,
     )
   )
 ));
