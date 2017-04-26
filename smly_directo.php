@@ -1,12 +1,12 @@
 <?php
 /**
- * @file Directo import class.
+ * @file Directo customer import class.
  *
  * @author Ra Mänd <ram4nd@gmail.com>
  *
  * Example:
  * require_once 'smly_directo.php'
- * $directo = new smly_directo('key');
+ * $directo = new smly_directo($url, $key);
  *
  * $response = $directo->curl_get_xml_object(
  *   'what',
@@ -76,6 +76,29 @@ class smly_directo
     curl_setopt($ch, CURLOPT_POSTFIELDS, $query);
     $this->_error(curl_exec($ch));
     curl_close($ch);
+  }
+
+  public function print_all_data($timestamp) {
+    // Import data from directo.
+    $response = $this->curl_get_xml_object(
+      'customer',
+      date('d.m.Y', $timestamp)
+    );
+
+    foreach ($response->xpath('//customer') as $key => $customer) {
+      $attributes = $customer->attributes();
+      $attributes = reset($attributes);
+      print_r($attributes);
+      $attributes = null;
+
+      foreach ($customer->xpath('datafields/data') as $data) {
+        $data_array = $data->attributes();
+        $data_array = reset($data_array);
+        print_r($data_array);
+        $data_array = null;
+        $data = null;
+      }
+    }
   }
 
   private function _error($msg) {
