@@ -3,10 +3,11 @@
  * @file Core class for Sendsmaily API requests.
  *
  * @author Ra Mänd <ram4nd@gmail.com>
+ * @link http://browse-tutorials.com/
  *
  * Example:
- * require_once 'smly_requests.php'
- * $smly = new smly('username', 'password', 'client');
+ * require_once 'sendsmaily_api.php'
+ * $smly = new sendsmaily('username', 'password', 'client');
  *
  * $list = $smly->curl_get('contact.php', array(
  *   'list' => 1,
@@ -15,20 +16,41 @@
 
 class smly
 {
-  protected $username;
-  protected $password;
-  protected $domain;
+  private $username;
+  private $password;
+  public $domain;
 
   public $errors = array();
-
-  protected $protocol = 'https';
-  protected $tld = 'net';
 
   public function __construct($username, $password, $domain) {
     $this->username = $username;
     $this->password = $password;
 
-    $this->domain = $this->protocol . '://' . $domain . '.sendsmaily.' . $this->tld . '/api/';
+    $this->domain = 'https://' . $domain . '.sendsmaily.net/api/';
+  }
+
+  public function get_contacts($list) {
+    $isIterated = false;
+    $offset = 0;
+    $limit = 15000;
+    while (!$isIterated) {
+      $contacts = $this->curl_get('contact.php', array(
+        'list' => $list,
+        'offset' => $offset,
+        'limit' => $limit,
+      ));
+
+      if (count($contacts) > 0) {
+        foreach ($contacts as $contact) {
+          yield $contact;
+        }
+      }
+      else {
+        break;
+      }
+
+      ++$offset;
+    }
   }
 
   public function curl_get($url, $query = array()) {
@@ -41,9 +63,6 @@ class smly
     curl_setopt($ch, CURLOPT_USERPWD, $this->username . ':' . $this->password);
 
     $result = curl_exec($ch);
-    if ($result === false) {
-      $this->_error(curl_error($ch));
-    }
     curl_close($ch);
 
     return $this->_process_request($result);
@@ -59,9 +78,6 @@ class smly
     curl_setopt($ch, CURLOPT_USERPWD, $this->username . ':' . $this->password);
 
     $result = curl_exec($ch);
-    if ($result === false) {
-      $this->_error(curl_error($ch));
-    }
     curl_close($ch);
 
     $result = $this->_process_request($result);
@@ -79,16 +95,16 @@ class smly
     }
   }
 
-  protected function _process_request($curl_result) {
+  private function _process_request($curl_result) {
     return json_decode($curl_result, true);
   }
 
-  protected function _error($msg) {
+  private function _error($msg) {
     $this->errors[] = $this->domain . ' - ' . date('d.m.Y H:i:s') . ': ' . $msg;
   }
 
   public function set_domain($domain) {
-    $this->domain = $this->protocol . '://' . $domain . '.sendsmaily.' . $this->tld . '/api/';
+    $this->domain = 'https://' . $domain . '.sendsmaily.net/api/';
   }
 }
 
