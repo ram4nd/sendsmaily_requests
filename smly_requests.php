@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file Core class for Sendsmaily API requests.
  *
@@ -29,10 +30,43 @@ class smly
     $this->domain = 'https://' . $domain . '.sendsmaily.net/api/';
   }
 
+  public function get_history($start_at, $end_at, $actions = 'all', $limit = 10000) {
+    $isIterated = false;
+    $offset = 0;
+
+    while (!$isIterated) {
+      $params = array(
+        'start_at' => $start_at,
+        'end_at' => $end_at,
+        'offset' => $offset,
+        'limit' => $limit,
+      );
+
+      // Optional limit of response actions.
+      if ($actions !== 'all') {
+        $params['actions'] = $actions;
+      }
+
+      $contacts = $this->curl_get('history.php', $params);
+
+      if (count($contacts) > 0) {
+        foreach ($contacts as $contact) {
+          yield $contact;
+        }
+      }
+      else {
+        break;
+      }
+
+      ++$offset;
+    }
+  }
+
   public function get_contacts($list) {
     $isIterated = false;
     $offset = 0;
     $limit = 15000;
+
     while (!$isIterated) {
       $contacts = $this->curl_get('contact.php', array(
         'list' => $list,
@@ -106,5 +140,16 @@ class smly
   public function set_domain($domain) {
     $this->domain = 'https://' . $domain . '.sendsmaily.net/api/';
   }
-}
 
+  public function round_time($strtotime, $minutes = 15) {
+    date_default_timezone_set('UTC');
+
+    $seconds = $minutes * 60;
+    $dateTimeZoneTallinn = new DateTimeZone('Europe/Tallinn');
+    $dateTimeTallinn = new DateTime($strtotime, $dateTimeZoneTallinn);
+    $tallinnOffset = $dateTimeZoneTallinn->getOffset($dateTimeTallinn);
+    $tallinnDateTime = strtotime($strtotime) + $tallinnOffset;
+
+    return floor($tallinnDateTime / $seconds) * $seconds;
+  }
+}
