@@ -30,35 +30,30 @@ class smly
     $this->domain = 'https://' . $domain . '.sendsmaily.net/api/';
   }
 
-  public function get_history($start_at, $end_at, $actions = 'all', $limit = 10000) {
-    $isIterated = false;
-    $offset = 0;
+  public function get_history($start_at, $end_at, $actions = 'all', $modify_fields = 'all') {
+    $params = array(
+      'start_at' => $start_at,
+      'end_at' => $end_at,
+      'offset' => 0,
+      'limit' => 0,
+    );
 
-    while (!$isIterated) {
-      $params = array(
-        'start_at' => $start_at,
-        'end_at' => $end_at,
-        'offset' => $offset,
-        'limit' => $limit,
-      );
+    // Optional limit of response actions.
+    if ($actions !== 'all') {
+      $params['actions'] = $actions;
+    }
 
-      // Optional limit of response actions.
-      if ($actions !== 'all') {
-        $params['actions'] = $actions;
+    // Optional limit of response actions.
+    if ($modify_fields !== 'all') {
+      $params['modify_fields'] = $modify_fields;
+    }
+
+    $contacts = $this->curl_get('history.php', $params);
+
+    if (count($contacts) > 0) {
+      foreach ($contacts as $contact) {
+        yield $contact;
       }
-
-      $contacts = $this->curl_get('history.php', $params);
-
-      if (count($contacts) > 0) {
-        foreach ($contacts as $contact) {
-          yield $contact;
-        }
-      }
-      else {
-        break;
-      }
-
-      ++$offset;
     }
   }
 
