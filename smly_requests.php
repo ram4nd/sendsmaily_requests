@@ -52,7 +52,6 @@ class smly
 
     if (count($contacts) > 0) {
       foreach ($contacts as $contact) {
-          print_r($contact);###
         $this->_history_data_to_array($contact['value']);
         yield $contact;
       }
