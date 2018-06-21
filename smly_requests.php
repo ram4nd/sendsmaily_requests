@@ -52,6 +52,8 @@ class smly
 
     if (count($contacts) > 0) {
       foreach ($contacts as $contact) {
+          print_r($contact);###
+        $this->_history_data_to_array($contact['value']);
         yield $contact;
       }
     }
@@ -122,6 +124,12 @@ class smly
       $this->_error($result['message']);
       return FALSE;
     }
+  }
+
+  function _history_data_to_array(&$values) {
+    $matches = array();
+    preg_match_all('/([a-z0-9_]+)=([^=]+);/', $values, $matches);
+    $values = array_combine($matches[1], $matches[2]);
   }
 
   private function _process_request($curl_result) {
