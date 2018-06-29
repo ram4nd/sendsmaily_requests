@@ -19,6 +19,7 @@ class smly
 {
   private $username;
   private $password;
+  private $limit = 20000;
   public $domain;
 
   public $errors = array();
@@ -61,13 +62,12 @@ class smly
   public function get_contacts($list) {
     $isIterated = false;
     $offset = 0;
-    $limit = 15000;
 
     while (!$isIterated) {
       $contacts = $this->curl_get('contact.php', array(
         'list' => $list,
         'offset' => $offset,
-        'limit' => $limit,
+        'limit' => $this->limit,
       ));
 
       if (count($contacts) > 0) {
@@ -96,6 +96,15 @@ class smly
     curl_close($ch);
 
     return $this->_process_request($result);
+  }
+
+  public function post_contacts(&$contacts) {
+    $contacts = array_chunk($contacts, $this->limit);
+    foreach ($contacts as &$bulk) {
+      $this->curl_post('contact.php', $bulk);
+
+      $bulk = NULL;
+    }
   }
 
   public function curl_post($url, $query) {
@@ -152,6 +161,11 @@ class smly
     $tallinnOffset = $dateTimeZoneTallinn->getOffset($dateTimeTallinn);
     $tallinnDateTime = strtotime($strtotime) + $tallinnOffset;
 
-    return floor($tallinnDateTime / $seconds) * $seconds;
+    if ($minutes) {
+      return floor($tallinnDateTime / $seconds) * $seconds;
+    }
+    else {
+      return $tallinnDateTime;
+    }
   }
 }
