@@ -83,6 +83,10 @@ class smly
     }
   }
 
+  public function forget_contacts($emails) {
+    $this->curl_post('contact/forget.php', $emails, TRUE);
+  }
+
   public function curl_get($url, $query = array()) {
     $query = urldecode(http_build_query($query));
 
@@ -107,14 +111,19 @@ class smly
     }
   }
 
-  public function curl_post($url, $query) {
+  public function curl_post($url, $query, $json = FALSE) {
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $this->domain . $url);
     curl_setopt($ch, CURLOPT_HEADER, 0);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($ch, CURLOPT_POST, 1);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($query));
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $json ? json_encode($query) : http_build_query($query));
     curl_setopt($ch, CURLOPT_USERPWD, $this->username . ':' . $this->password);
+    if ($json) {
+      curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+        'Content-Type: application/json',
+      ));
+    }
 
     $result = curl_exec($ch);
     curl_close($ch);
