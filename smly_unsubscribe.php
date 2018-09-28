@@ -116,7 +116,7 @@ class smly_unsubscribe extends smly
           $values['unsubscribe'],
           ((int) $values['unsubscribe'] === 1 ? $values['unsubscribe_comment'] : '')
         )) {
-          $this->html .= $this->_success_html($this->form_strings['unsubscribe_success']);
+          $this->html .= $this->_success_html($this->options['forms']['unsubscribe']['unsubscribe_success']);
         }
       }
       else {
@@ -260,6 +260,10 @@ class smly_unsubscribe extends smly
         '<label for="unsubscribe_reason_' . $key . '" style="display:block;padding-left:30px">' . $reason['label'] . '</label>' .
         ($reason['text'] ? '<textarea name="smly[unsubscribe_comment]" rows="4" style="display:none"></textarea>' : '') .
       '</p>';
+    }
+
+    if ($this->forms_count === 1) {
+      $return .= '<input type="hidden" name="smly[action]" value="unsubscribe" />';
     }
 
     return '<div class="smly_action_unsubscribe">' . $return . '</div>';
