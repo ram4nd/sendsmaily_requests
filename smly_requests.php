@@ -143,7 +143,7 @@ class smly
     }
   }
 
-  function _history_data_to_array(&$values) {
+  private function _history_data_to_array(&$values) {
     $matches = array();
     preg_match_all('/([a-z0-9_]+)=([^=]+);/', $values, $matches);
     $values = array_combine($matches[1], $matches[2]);
