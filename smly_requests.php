@@ -4,6 +4,7 @@
  * @file Core class for Sendsmaily API requests.
  *
  * @author Ra Mänd <ram4nd@gmail.com>
+ * @link http://browse-tutorials.com/
  *
  * Example:
  * require_once 'sendsmaily_api.php'
@@ -20,8 +21,6 @@ class smly
   private $password;
   private $limit = 20000;
   public $domain;
-
-  public $errors = array();
 
   public function __construct($username, $password, $domain) {
     $this->username = $username;
@@ -51,18 +50,21 @@ class smly
     $contacts = $this->curl_get('history.php', $params);
 
     if (count($contacts) > 0) {
-      foreach ($contacts as $contact) {
-        $this->_history_data_to_array($contact['value']);
+      foreach ($contacts as &$contact) {
+        if (isset($contact['value']) && !empty($contact['value'])) {
+          $this->_history_data_to_array($contact['value']);
+        }
         yield $contact;
+        $contact = NULL;
       }
     }
   }
 
   public function get_contacts($list) {
-    $isIterated = false;
     $offset = 0;
 
-    while (!$isIterated) {
+    $contacts = array();
+    while (true) {
       $contacts = $this->curl_get('contact.php', array(
         'list' => $list,
         'offset' => $offset,
@@ -70,8 +72,9 @@ class smly
       ));
 
       if (count($contacts) > 0) {
-        foreach ($contacts as $contact) {
+        foreach ($contacts as &$contact) {
           yield $contact;
+          $contact = NULL;
         }
       }
       else {
@@ -96,7 +99,16 @@ class smly
     curl_setopt($ch, CURLOPT_USERPWD, $this->username . ':' . $this->password);
 
     $result = curl_exec($ch);
+    $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
+
+    if ((int) $code !== 200) {
+      throw new Exception('Http request error ' . $code);
+    }
+
+    if (isset($result['code']) && (int) $result['code'] !== 101) {
+      throw new Exception('Http request error ' . $result['message']);
+    }
 
     return $this->_process_request($result);
   }
@@ -130,15 +142,13 @@ class smly
     $result = $this->_process_request($result);
 
     if (!isset($result['code'])) {
-      $this->_error('Something went wrong with the request.');
-      return FALSE;
+      throw new Exception('Something went wrong with the request.');
     }
     elseif ((int) $result['code'] === 101) {
       return TRUE;
     }
     else {
-      $this->_error($result['message']);
-      return FALSE;
+      throw new Exception('Http request error ' . $result['message']);
     }
   }
 
@@ -148,12 +158,8 @@ class smly
     $values = array_combine($matches[1], $matches[2]);
   }
 
-  private function _process_request($curl_result) {
+  private function _process_request(&$curl_result) {
     return json_decode($curl_result, true);
-  }
-
-  private function _error($msg) {
-    $this->errors[] = $this->domain . ' - ' . date('d.m.Y H:i:s') . ': ' . $msg;
   }
 
   public function set_domain($domain) {
@@ -167,13 +173,13 @@ class smly
     $dateTimeZoneTallinn = new DateTimeZone('Europe/Tallinn');
     $dateTimeTallinn = new DateTime($strtotime, $dateTimeZoneTallinn);
     $tallinnOffset = $dateTimeZoneTallinn->getOffset($dateTimeTallinn);
+
     $tallinnDateTime = strtotime($strtotime) + $tallinnOffset;
 
     if ($minutes) {
       return floor($tallinnDateTime / $seconds) * $seconds;
     }
-    else {
-      return $tallinnDateTime;
-    }
+
+    return $tallinnDateTime;
   }
 }
